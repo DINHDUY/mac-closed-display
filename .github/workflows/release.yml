@@ -55,78 +55,82 @@ jobs:
         key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
           ${{ runner.os }}-spm-
-          
-    - name: Build release binary
-      run: |
-        swift build -c release
-        strip .build/release/ClosedDisplay
-        
+
     - name: Run tests
       run: swift test
-      
+
+    - name: Build app bundle
+      run: |
+        chmod +x scripts/build-app.sh
+        ./scripts/build-app.sh ${{ steps.get_version.outputs.version }}
+
+    - name: Strip binary
+      run: strip ClosedDisplay.app/Contents/MacOS/ClosedDisplay
+
     - name: Create TAR.GZ package
       run: |
-        chmod +x create-release.sh
-        ./create-release.sh ${{ steps.get_version.outputs.version }}
-        
+        chmod +x scripts/create-release.sh
+        ./scripts/create-release.sh ${{ steps.get_version.outputs.version }}
+
     - name: Create DMG package
       run: |
-        chmod +x create-dmg.sh
-        ./create-dmg.sh ${{ steps.get_version.outputs.version }}
+        chmod +x scripts/create-dmg.sh
+        ./scripts/create-dmg.sh ${{ steps.get_version.outputs.version }}
         
     - name: Generate release notes
       id: generate_notes
       run: |
         VERSION=${{ steps.get_version.outputs.version }}
-        
+
         cat > release_notes.md << 'EOF'
         ## ClosedDisplay v${{ steps.get_version.outputs.version }}
-        
+
         A macOS utility that allows Apple Silicon Macs to run with the lid closed without requiring an external display.
-        
+
         ### 📦 Installation
-        
+
         **Option 1: DMG (Recommended)**
         1. Download `ClosedDisplay-v${{ steps.get_version.outputs.version }}-arm64.dmg`
-        2. Open the DMG file
-        3. Double-click `install.sh` (or right-click → Open)
-        4. Follow the installation prompts
-        
+        2. Open the DMG
+        3. Drag **ClosedDisplay.app** to your Applications folder
+        4. Launch from Applications or Spotlight
+
         **Option 2: TAR.GZ**
         ```bash
         tar -xzf ClosedDisplay-v${{ steps.get_version.outputs.version }}-arm64.tar.gz
-        cd ClosedDisplay-v${{ steps.get_version.outputs.version }}
-        ./install.sh
+        cp -R ClosedDisplay-v${{ steps.get_version.outputs.version }}/ClosedDisplay.app /Applications/
+        open /Applications/ClosedDisplay.app
         ```
-        
+
         ### ✨ Features
-        
+
+        - Menu bar icon showing active/suspended/disabled state
         - Prevents system sleep when laptop lid is closed
+        - Suspend mode to temporarily allow sleep without fully disabling
         - Thermal safety monitoring (automatically reverts on overheating)
         - Power source awareness (AC/battery transitions)
-        - Clean signal handling for graceful shutdown
-        
+        - Native macOS notifications on state change
+
         ### 📋 Requirements
-        
+
         - macOS 14.0 or later
         - Apple Silicon Mac (M1/M2/M3/M4)
-        - Administrator privileges (for initial setup)
-        
+
         ### 🔐 Verification
-        
+
         **SHA256 Checksums:**
         ```
         $(cat ClosedDisplay-v${VERSION}-arm64.dmg.sha256)
         $(cat ClosedDisplay-v${VERSION}-arm64.tar.gz.sha256)
         ```
-        
+
         ### 📖 Documentation
-        
-        See [README.md](README.md) for detailed usage instructions.
-        
+
+        See [README.md](README.md) for the full user guide.
+
         ---
-        
-        **Note:** This is an unsigned binary. On first run, you may need to go to System Settings → Privacy & Security and click "Allow Anyway".
+
+        **Note:** This app is unsigned. On first launch, macOS may show a security warning. Go to **System Settings → Privacy & Security** and click **Open Anyway**.
         EOF
         
     - name: Create GitHub Release

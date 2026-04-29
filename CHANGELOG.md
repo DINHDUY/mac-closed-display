@@ -7,10 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- Initial release preparation
+## [1.0.1] - 2026-04-29
 
-## [1.0.0] - TBD
+### Added
+- Menu bar status icon with three states: active (●), suspended (⏸), disabled (○)
+- Dropdown menu with Enable/Disable, Suspend, About, and Quit actions
+- Native macOS notifications on state change (requires app bundle)
+- Suspend mode — temporarily allow sleep without fully disabling
+- Hover tooltip showing current state
+
+### Changed
+- App now ships as a proper `.app` bundle (`ClosedDisplay.app`) instead of a bare binary
+- DMG uses drag-to-Applications layout for standard macOS install experience
+- Reorganized all shell scripts into `scripts/` directory
+- Release pipeline builds and packages the `.app` bundle
+
+
+## [1.0.0] - 2026-04-29 MVP
 
 ### Added
 - Initial release of ClosedDisplay
@@ -48,5 +61,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No data collection or telemetry
 - Open source for security audit
 
-[Unreleased]: https://github.com/DINHDUY/mac-closed-display/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/DINHDUY/mac-closed-display/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/DINHDUY/mac-closed-display/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/DINHDUY/mac-closed-display/releases/tag/v1.0.0

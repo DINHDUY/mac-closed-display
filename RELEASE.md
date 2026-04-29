@@ -54,21 +54,21 @@ For local testing or custom builds:
 
 **Create all formats at once:**
 ```bash
-./create-all-releases.sh [version]
+./scripts/create-all-releases.sh [version]
 ```
 
 **Individual formats:**
-- **TAR.GZ**: `./create-release.sh [version]`
-- **DMG**: `./create-dmg.sh [version]`
+- **TAR.GZ**: `./scripts/create-release.sh [version]`
+- **DMG**: `./scripts/create-dmg.sh [version]`
 
 ---
 
 ## What to Include in a Release
 
 ### Required Files:
-1. **ClosedDisplay** (compiled binary from `.build/release/ClosedDisplay`)
-2. **install.sh** - Automated installation script
-3. **uninstall.sh** - Automated uninstallation script
+1. **ClosedDisplay.app** (app bundle built by `scripts/build-app.sh`)
+2. **scripts/install.sh** - Installation helper
+3. **scripts/uninstall.sh** - Uninstallation helper
 4. **README.md** - Usage instructions
 5. **LICENSE** - License file
 
@@ -96,8 +96,8 @@ cd ClosedDisplay-v1.0.0
 cp ../.build/release/ClosedDisplay .
 
 # Copy scripts
-cp ../install.sh .
-cp ../uninstall.sh .
+cp ../scripts/install.sh .
+cp ../scripts/uninstall.sh .
 
 # Make scripts executable
 chmod +x install.sh uninstall.sh
@@ -128,7 +128,7 @@ tar -czf ClosedDisplay-v1.0.0-arm64.tar.gz ClosedDisplay-v1.0.0/
 **Option B: DMG (macOS native, recommended)**
 ```bash
 cd ..
-./create-dmg.sh 1.0.0
+./scripts/create-dmg.sh 1.0.0
 ```
 
 The DMG provides a better user experience:

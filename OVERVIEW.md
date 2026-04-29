@@ -109,7 +109,7 @@ git tag v1.0.0 && git push origin v1.0.0
 
 Both formats include:
 - ClosedDisplay binary
-- install.sh / uninstall.sh
+- scripts/install.sh / scripts/uninstall.sh
 - README.md
 - LICENSE
 - Optional LaunchAgent plist
@@ -220,11 +220,11 @@ swift test
 swift build -c release
 
 # Create packages
-./create-all-releases.sh 1.0.0
+./scripts/create-all-releases.sh 1.0.0
 
 # Individual packages
-./create-release.sh 1.0.0  # TAR.GZ
-./create-dmg.sh 1.0.0      # DMG
+./scripts/create-release.sh 1.0.0  # TAR.GZ
+./scripts/create-dmg.sh 1.0.0      # DMG
 ```
 
 ## 📞 Support

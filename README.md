@@ -47,130 +47,64 @@ Transform your MacBook into a headless server for development, testing, or home 
 
 ### Option 1: Download DMG (Recommended)
 
-1. Download the latest `.dmg` file from the [GitHub Releases page](https://github.com/DINHDUY/mac-closed-display/releases)
-2. Open the downloaded DMG file
-3. Follow the installation instructions inside
-4. Run the installer:
-   ```bash
-   sudo ./install.sh
-   ```
-
-The DMG package includes the binary, installation scripts, and all necessary documentation.
+1. Download the latest `.dmg` from [GitHub Releases](https://github.com/DINHDUY/mac-closed-display/releases)
+2. Open the DMG and drag **ClosedDisplay.app** to your Applications folder
+3. Launch ClosedDisplay from Applications or Spotlight
 
 ### Option 2: Download TAR.GZ
 
-1. Download the latest `.tar.gz` file from the [GitHub Releases page](https://github.com/DINHDUY/mac-closed-display/releases)
-2. Verify the checksum (optional but recommended):
+1. Download the latest `.tar.gz` from [GitHub Releases](https://github.com/DINHDUY/mac-closed-display/releases)
+2. Verify the checksum (optional):
    ```bash
    shasum -a 256 -c ClosedDisplay-v*.tar.gz.sha256
    ```
-3. Extract the archive:
+3. Extract and install:
    ```bash
    tar -xzf ClosedDisplay-v*.tar.gz
-   cd ClosedDisplay-v*
-   ```
-4. Run the installer:
-   ```bash
-   sudo ./install.sh
+   cp -R ClosedDisplay-v*/ClosedDisplay.app /Applications/
    ```
 
 ### Option 3: Build from Source
 
-For developers or those who want to build manually:
-
-1. **Build the Project**
-   ```bash
-   swift build -c release
-   ```
-   
-   The build produces the main executable:
-   - `.build/release/ClosedDisplay` - Main application
-
-2. **Configure Permissions**
-   
-   Create a sudoers entry to allow `pmset` to run without password prompts:
-   
-   ```bash
-   sudo visudo -f /private/etc/sudoers.d/closeddisplay
-   ```
-   
-   Add the following line (replace `<username>` with your username):
-   
-   ```
-   <username> ALL=(ALL) NOPASSWD: /usr/bin/pmset
-   ```
-   
-   Save and exit the editor.
-
-3. **Copy Binary** (optional)
-   ```bash
-   sudo cp .build/release/ClosedDisplay /usr/local/bin/
-   ```
-
-### Option 4: Build as macOS App Bundle (Recommended for Menu Bar)
-
-For full menu bar functionality including tooltips and menu interactions:
-
-1. **Build the App Bundle**
-   ```bash
-   ./build-app.sh
-   ```
-   
-   This creates `ClosedDisplay.app` with full macOS integration.
-
-2. **Install to Applications**
-   ```bash
-   cp -R ClosedDisplay.app /Applications/
-   ```
-
-3. **Launch the App**
-   ```bash
-   open /Applications/ClosedDisplay.app
-   ```
-   
-   Or launch from Spotlight/Launchpad.
-
-**App Bundle Benefits:**
-- ✅ Menu bar icon with working tooltips
-- ✅ Click menu to access all features
-- ✅ Native system notifications
-- ✅ Auto-start via Login Items
-
-See [docs/app-bundle.md](docs/app-bundle.md) for detailed instructions.
-
-## Usage
-
-### Menu Bar App (Recommended)
-
-When running as an app bundle, ClosedDisplay provides a menu bar icon:
-
-- **Hover** over the icon to see status tooltip
-- **Click** the icon to access:
-  - Enable/Disable ClosedDisplay
-  - Suspend (temporarily allow sleep)
-  - About
-  - Quit
-
-### Command Line
-
-Run the main application:
-
 ```bash
-.build/release/ClosedDisplay
+swift build -c release
+./scripts/build-app.sh  # creates ClosedDisplay.app
+cp -R ClosedDisplay.app /Applications/
 ```
 
-The application will:
-1. Monitor for lid closure events
-2. Prevent system sleep when the lid is closed
-3. Maintain thermal safety monitoring
-4. Restore normal behavior when the session ends
+## User Guide
 
-### Stopping a Session
+### Menu Bar Icon
 
-Press `Ctrl+C` or send a termination signal. The application will:
-1. Restore normal sleep behavior
-2. Release all system assertions
-3. Clean up resources
+Once running, ClosedDisplay lives in your menu bar. The icon shows the current state at a glance:
+
+| Icon | State |
+|------|-------|
+| `●` (checkmark circle) | Active — sleep is prevented when lid is closed |
+| `⏸` (pause circle) | Suspended — sleep is temporarily allowed |
+| `○` (empty circle) | Disabled — ClosedDisplay is off |
+
+Hover over the icon to see a status tooltip.
+
+### Dropdown Menu
+
+Click the menu bar icon to open the control menu:
+
+<img src="docs/images/menu-dropdown.png" alt="ClosedDisplay dropdown menu" width="300">
+
+| Menu Item | Description |
+|-----------|-------------|
+| **Enable / Disable ClosedDisplay** | Toggle the main feature on or off. When disabled, macOS resumes its default lid-close sleep behavior. |
+| **Suspend (Allow Sleep on Lid Close)** | Temporarily pause ClosedDisplay without fully disabling it. Useful when you want to let the Mac sleep just this once. Click **Resume** to re-activate. |
+| **About ClosedDisplay** | Shows version and app information. |
+| **Quit** (`⌘Q`) | Exits the app and restores normal macOS sleep behavior. |
+
+### Auto-Start on Login
+
+To have ClosedDisplay launch automatically when you log in:
+
+1. Open **System Settings → General → Login Items**
+2. Click **+** and select `ClosedDisplay.app` from your Applications folder
 
 ## How It Works
 
@@ -197,7 +131,8 @@ The test suite includes:
 - Correctness tests (state transitions, lifecycle)
 - Performance benchmarks (state change overhead)
 - Property-based tests (state machine invariants)
-Contributing
+
+## Contributing
 
 Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
@@ -209,7 +144,6 @@ For security concerns, please see our [Security Policy](SECURITY.md).
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.
 
-## 
 ## Architecture
 
 See [docs/closed-display.md](docs/closed-display.md) for detailed architecture documentation.

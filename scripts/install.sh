@@ -51,12 +51,19 @@ fi
 
 echo -e "${GREEN}✓${NC} Checking prerequisites..."
 
-# Install binary
+# Install app bundle or binary
 echo ""
-echo "Installing binary to $INSTALL_DIR..."
-sudo cp .build/release/$BINARY_NAME $INSTALL_DIR/
-sudo chmod +x $INSTALL_DIR/$BINARY_NAME
-echo -e "${GREEN}✓${NC} Binary installed"
+APP_BUNDLE="${BINARY_NAME}.app"
+if [ -d "$APP_BUNDLE" ]; then
+    echo "Installing app bundle to /Applications..."
+    sudo cp -R "$APP_BUNDLE" /Applications/
+    echo -e "${GREEN}✓${NC} App bundle installed to /Applications/${APP_BUNDLE}"
+else
+    echo "Installing binary to $INSTALL_DIR..."
+    sudo cp .build/release/$BINARY_NAME $INSTALL_DIR/
+    sudo chmod +x $INSTALL_DIR/$BINARY_NAME
+    echo -e "${GREEN}✓${NC} Binary installed"
+fi
 
 # Configure sudoers
 echo ""

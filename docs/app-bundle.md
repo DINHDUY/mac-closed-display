@@ -17,7 +17,7 @@ When built as a proper `.app` bundle:
 ### Quick Build
 
 ```bash
-./build-app.sh
+./scripts/build-app.sh
 ```
 
 This creates `ClosedDisplay.app` in the project directory.
@@ -29,7 +29,7 @@ This creates `ClosedDisplay.app` in the project directory.
 swift build -c release
 
 # Run the build script
-./build-app.sh
+./scripts/build-app.sh
 ```
 
 ## Installing the App
@@ -105,7 +105,7 @@ System Settings → General → Login Items → Remove ClosedDisplay
 
 ### App won't open
 - Check if another instance is running: `killall ClosedDisplay`
-- Rebuild: `./build-app.sh`
+- Rebuild: `./scripts/build-app.sh`
 
 ### Menu bar icon doesn't appear
 - Check Console app for errors
