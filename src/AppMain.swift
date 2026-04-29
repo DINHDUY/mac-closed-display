@@ -5,12 +5,15 @@
 import Foundation
 import IOKit
 import IOKit.pwr_mgt
+import Cocoa
+import UserNotifications
 
 // MARK: - Global Session Manager
 
 var globalSessionManager: SessionManager?
 var globalDelegate: SessionDelegate?
 var lidStateTimer: Timer?
+var statusBarController: StatusBarController?
 
 // MARK: - Session Delegate
 
@@ -82,6 +85,13 @@ func startLidMonitoring() {
     // Poll lid state every 2 seconds (IOKit notifications require mach ports and more complex setup)
     lidStateTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
         guard let sessionManager = globalSessionManager else { return }
+        guard let statusBar = statusBarController, statusBar.currentState else {
+            // If status bar is disabled, end any active session
+            if sessionManager.currentState == .clamshellActive {
+                sessionManager.endSession()
+            }
+            return
+        }
         
         if let isOpen = IOKitServices.getClamshellState() {
             sessionManager.handleLidStateChange(!isOpen)
@@ -134,11 +144,18 @@ func startPowerMonitoring() {
 @main
 struct Main {
     static func main() {
+        // Initialize NSApplication for menu bar access
+        let app = NSApplication.shared
+        app.setActivationPolicy(.accessory) // Run as background app with menu bar icon
+        
         print("[ClosedDisplay] Starting continuous monitoring...")
         print("[ClosedDisplay] Press Ctrl+C to stop")
         
         // Set up signal handlers for graceful shutdown
         setupSignalHandlers()
+        
+        // Create status bar controller (FR: menu bar icon, default on/running)
+        statusBarController = StatusBarController()
         
         // Create delegate and session manager
         let delegate = SessionDelegate()
@@ -150,8 +167,8 @@ struct Main {
         if let clamshellState = IOKitServices.getClamshellState() {
             print("[ClosedDisplay] Laptop detected, clamshell \(clamshellState ? "closed" : "open")")
             
-            // Start session if lid is already closed
-            if clamshellState {
+            // Start session if lid is already closed AND status bar is enabled
+            if clamshellState && statusBarController?.currentState == true {
                 sessionManager.startSession()
             }
         } else {
@@ -167,7 +184,7 @@ struct Main {
         
         print("[ClosedDisplay] Monitoring active...")
         
-        // Keep app running
-        RunLoop.main.run()
+        // Run the NSApplication event loop - required for AppKit UI events (menu clicks, tooltips)
+        app.run()
     }
 }

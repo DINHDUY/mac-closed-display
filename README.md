@@ -107,9 +107,51 @@ For developers or those who want to build manually:
    sudo cp .build/release/ClosedDisplay /usr/local/bin/
    ```
 
+### Option 4: Build as macOS App Bundle (Recommended for Menu Bar)
+
+For full menu bar functionality including tooltips and menu interactions:
+
+1. **Build the App Bundle**
+   ```bash
+   ./build-app.sh
+   ```
+   
+   This creates `ClosedDisplay.app` with full macOS integration.
+
+2. **Install to Applications**
+   ```bash
+   cp -R ClosedDisplay.app /Applications/
+   ```
+
+3. **Launch the App**
+   ```bash
+   open /Applications/ClosedDisplay.app
+   ```
+   
+   Or launch from Spotlight/Launchpad.
+
+**App Bundle Benefits:**
+- ✅ Menu bar icon with working tooltips
+- ✅ Click menu to access all features
+- ✅ Native system notifications
+- ✅ Auto-start via Login Items
+
+See [docs/app-bundle.md](docs/app-bundle.md) for detailed instructions.
+
 ## Usage
 
-### Starting a Session
+### Menu Bar App (Recommended)
+
+When running as an app bundle, ClosedDisplay provides a menu bar icon:
+
+- **Hover** over the icon to see status tooltip
+- **Click** the icon to access:
+  - Enable/Disable ClosedDisplay
+  - Suspend (temporarily allow sleep)
+  - About
+  - Quit
+
+### Command Line
 
 Run the main application:
 

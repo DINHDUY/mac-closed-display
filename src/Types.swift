@@ -66,4 +66,7 @@ struct Constants {
 
     // MARK: XPC Timeout (OPT-07)
     static let xpcTimeout: TimeInterval = 5.0
+    
+    // MARK: Status Bar
+    static let statusBarEnabledKey = "com.closed-display.enabled"
 }
