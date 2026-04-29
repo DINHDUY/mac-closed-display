@@ -8,7 +8,7 @@ APP_NAME="ClosedDisplay"
 APP_BUNDLE="${APP_NAME}.app"
 PACKAGE_NAME="ClosedDisplay-v$VERSION"
 DMG_NAME="${PACKAGE_NAME}-arm64.dmg"
-VOLUME_NAME="ClosedDisplay $VERSION"
+VOLUME_NAME="ClosedDisplay-v$VERSION"
 STAGING_DIR="dmg_staging"
 
 echo "Creating DMG package: $DMG_NAME"
@@ -119,10 +119,11 @@ hdiutil create -volname "$VOLUME_NAME" \
 
 # Mount the temporary DMG
 echo "Mounting DMG for customization..."
-MOUNT_POINT=$(hdiutil attach -readwrite -noverify -noautoopen "$TEMP_DMG" | awk 'END{print $NF}')
+hdiutil attach -readwrite -noverify -noautoopen "$TEMP_DMG" > /dev/null
+MOUNT_POINT="/Volumes/${VOLUME_NAME}"
 
-if [ -z "$MOUNT_POINT" ]; then
-    echo "Error: Could not mount DMG"
+if [ ! -d "$MOUNT_POINT" ]; then
+    echo "Error: Could not mount DMG at $MOUNT_POINT"
     exit 1
 fi
 
