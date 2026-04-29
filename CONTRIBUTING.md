@@ -42,8 +42,8 @@ Enhancement suggestions are tracked as GitHub issues. Create an issue using the 
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/closed-display.git
-cd closed-display
+git clone https://github.com/DINHDUY/mac-closed-display.git
+cd mac-closed-display
 
 # Build the project
 swift build
@@ -136,7 +136,7 @@ Releases are automated through GitHub Actions:
 ## Getting Help
 
 - Read the [README.md](README.md)
-- Check existing [Issues](https://github.com/yourusername/closed-display/issues)
+- Check existing [Issues](https://github.com/DINHDUY/mac-closed-display/issues)
 - Read the [Documentation](docs/)
 
 ## Recognition

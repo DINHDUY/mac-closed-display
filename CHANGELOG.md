@@ -48,5 +48,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No data collection or telemetry
 - Open source for security audit
 
-[Unreleased]: https://github.com/yourusername/closed-display/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/yourusername/closed-display/releases/tag/v1.0.0
+[Unreleased]: https://github.com/DINHDUY/mac-closed-display/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/DINHDUY/mac-closed-display/releases/tag/v1.0.0

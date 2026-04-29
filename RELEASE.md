@@ -248,8 +248,8 @@ gh release create v1.0.0 \
 ```ruby
 class Closeddisplay < Formula
   desc "Allow Apple Silicon Macs to run with lid closed"
-  homepage "https://github.com/yourusername/closed-display"
-  url "https://github.com/yourusername/closed-display/releases/download/v1.0.0/ClosedDisplay-v1.0.0-arm64.tar.gz"
+  homepage "https://github.com/DINHDUY/mac-closed-display"
+  url "https://github.com/DINHDUY/mac-closed-display/releases/download/v1.0.0/ClosedDisplay-v1.0.0-arm64.tar.gz"
   sha256 "CALCULATED_SHA256_HERE"
   
   def install

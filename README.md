@@ -1,8 +1,8 @@
 # ClosedDisplay
 
-[![Build](https://github.com/yourusername/closed-display/workflows/Build/badge.svg)](https://github.com/yourusername/closed-display/actions/workflows/build.yml)
-[![Tests](https://github.com/yourusername/closed-display/workflows/Tests/badge.svg)](https://github.com/yourusername/closed-display/actions/workflows/test.yml)
-[![Release](https://github.com/yourusername/closed-display/workflows/Release/badge.svg)](https://github.com/yourusername/closed-display/actions/workflows/release.yml)
+[![Build](https://github.com/DINHDUY/mac-closed-display/actions/workflows/build.yml/badge.svg)](https://github.com/DINHDUY/mac-closed-display/actions/workflows/build.yml)
+[![Tests](https://github.com/DINHDUY/mac-closed-display/actions/workflows/test.yml/badge.svg)](https://github.com/DINHDUY/mac-closed-display/actions/workflows/test.yml)
+[![Release](https://github.com/DINHDUY/mac-closed-display/actions/workflows/release.yml/badge.svg)](https://github.com/DINHDUY/mac-closed-display/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A macOS utility that allows Apple Silicon Macs to continue running with the lid closed, without requiring an external display.
@@ -47,7 +47,7 @@ Transform your MacBook into a headless server for development, testing, or home 
 
 ### Option 1: Download DMG (Recommended)
 
-1. Download the latest `.dmg` file from the [GitHub Releases page](https://github.com/yourusername/closed-display/releases)
+1. Download the latest `.dmg` file from the [GitHub Releases page](https://github.com/DINHDUY/mac-closed-display/releases)
 2. Open the downloaded DMG file
 3. Follow the installation instructions inside
 4. Run the installer:
@@ -59,7 +59,7 @@ The DMG package includes the binary, installation scripts, and all necessary doc
 
 ### Option 2: Download TAR.GZ
 
-1. Download the latest `.tar.gz` file from the [GitHub Releases page](https://github.com/yourusername/closed-display/releases)
+1. Download the latest `.tar.gz` file from the [GitHub Releases page](https://github.com/DINHDUY/mac-closed-display/releases)
 2. Verify the checksum (optional but recommended):
    ```bash
    shasum -a 256 -c ClosedDisplay-v*.tar.gz.sha256
