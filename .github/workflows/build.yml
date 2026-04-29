@@ -1,0 +1,51 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  SWIFT_VERSION: '6.0'
+
+jobs:
+  build:
+    name: Build on macOS
+    runs-on: macos-14  # Apple Silicon runner
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: ${{ env.SWIFT_VERSION }}
+        
+    - name: Cache Swift packages
+      uses: actions/cache@v4
+      with:
+        path: .build
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
+          
+    - name: Build for release
+      run: swift build -c release
+      
+    - name: Run tests
+      run: swift test
+      
+    - name: Verify binary
+      run: |
+        file .build/release/ClosedDisplay
+        .build/release/ClosedDisplay --help || true
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ClosedDisplay-binary-${{ github.sha }}
+        path: .build/release/ClosedDisplay
+        retention-days: 7

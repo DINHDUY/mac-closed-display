@@ -1,0 +1,87 @@
+name: Bug Report
+description: File a bug report to help us improve
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+        
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of what the bug is
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+      
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+      placeholder: Tell us what you expected!
+    validations:
+      required: true
+      
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Run ClosedDisplay
+        2. Close lid
+        3. See error
+    validations:
+      required: true
+      
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Which version of ClosedDisplay are you using?
+      placeholder: "v1.0.0"
+    validations:
+      required: true
+      
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS Version
+      description: Which version of macOS are you running?
+      placeholder: "macOS 14.0"
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: chip
+    attributes:
+      label: Mac Chip
+      description: Which Apple Silicon chip do you have?
+      options:
+        - M1
+        - M2
+        - M3
+        - M4
+        - Other
+    validations:
+      required: true
+      
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output
+      render: shell
+      
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our Code of Conduct
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

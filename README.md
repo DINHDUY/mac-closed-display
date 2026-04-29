@@ -1,5 +1,10 @@
 # ClosedDisplay
 
+[![Build](https://github.com/yourusername/closed-display/workflows/Build/badge.svg)](https://github.com/yourusername/closed-display/actions/workflows/build.yml)
+[![Tests](https://github.com/yourusername/closed-display/workflows/Tests/badge.svg)](https://github.com/yourusername/closed-display/actions/workflows/test.yml)
+[![Release](https://github.com/yourusername/closed-display/workflows/Release/badge.svg)](https://github.com/yourusername/closed-display/actions/workflows/release.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A macOS utility that allows Apple Silicon Macs to continue running with the lid closed, without requiring an external display.
 
 ## Overview
@@ -10,6 +15,28 @@ ClosedDisplay uses a split-process architecture to safely override macOS power m
 - **Helper Tool**: Executes privileged system commands (`pmset`) to prevent sleep
 - **Safety**: Automatically reverts on thermal pressure to prevent hardware damage
 
+## Use Cases
+
+ClosedDisplay is perfect for scenarios where you need your Mac to keep working with the lid closed:
+
+### 🤖 **AI Agent & Workflow Development**
+Running multi-agent workflows or long-running AI tasks in the background? When you close your MacBook Pro lid, macOS typically shuts down network connectivity, interrupting your background processes. ClosedDisplay keeps your system active, maintaining network connections so your AI agents, workflows, and background tasks continue running uninterrupted.
+
+### 🎵 **Media Server**
+Use your MacBook as a music or media server in a closed, space-saving configuration while streaming content to other devices on your network.
+
+### 💻 **Remote Development & SSH Sessions**
+Keep your Mac accessible for remote SSH sessions, remote desktop connections, or as a development server while saving desk space with the lid closed.
+
+### 📊 **Data Processing & Long-Running Tasks**
+Run overnight data analysis, batch processing jobs, machine learning training, or rendering tasks without needing to keep the lid open or connect an external display.
+
+### 🔄 **Background Synchronization**
+Keep cloud syncing services (Time Machine backups, iCloud, Dropbox, etc.) running continuously without interruption, even with the lid closed.
+
+### 🖥️ **Headless Server Mode**
+Transform your MacBook into a headless server for development, testing, or home automation tasks while maintaining full processing power.
+
 ## Requirements
 
 - macOS 14.0 or later
@@ -18,31 +45,67 @@ ClosedDisplay uses a split-process architecture to safely override macOS power m
 
 ## Installation
 
-### 1. Build the Project
+### Option 1: Download DMG (Recommended)
 
-```bash
-swift build -c release
-```
+1. Download the latest `.dmg` file from the [GitHub Releases page](https://github.com/yourusername/closed-display/releases)
+2. Open the downloaded DMG file
+3. Follow the installation instructions inside
+4. Run the installer:
+   ```bash
+   sudo ./install.sh
+   ```
 
-The build produces two executables:
-- `.build/release/ClosedDisplay` - Main application
-- `.build/release/ClosedDisplayHelper` - Privileged helper
+The DMG package includes the binary, installation scripts, and all necessary documentation.
 
-### 2. Configure Permissions
+### Option 2: Download TAR.GZ
 
-Create a sudoers entry to allow `pmset` to run without password prompts:
+1. Download the latest `.tar.gz` file from the [GitHub Releases page](https://github.com/yourusername/closed-display/releases)
+2. Verify the checksum (optional but recommended):
+   ```bash
+   shasum -a 256 -c ClosedDisplay-v*.tar.gz.sha256
+   ```
+3. Extract the archive:
+   ```bash
+   tar -xzf ClosedDisplay-v*.tar.gz
+   cd ClosedDisplay-v*
+   ```
+4. Run the installer:
+   ```bash
+   sudo ./install.sh
+   ```
 
-```bash
-sudo visudo -f /private/etc/sudoers.d/closeddisplay
-```
+### Option 3: Build from Source
 
-Add the following line (replace `<username>` with your username):
+For developers or those who want to build manually:
 
-```
-<username> duy ALL=(ALL) NOPASSWD: /usr/bin/pmset
-```
+1. **Build the Project**
+   ```bash
+   swift build -c release
+   ```
+   
+   The build produces the main executable:
+   - `.build/release/ClosedDisplay` - Main application
 
-Save and exit the editor.
+2. **Configure Permissions**
+   
+   Create a sudoers entry to allow `pmset` to run without password prompts:
+   
+   ```bash
+   sudo visudo -f /private/etc/sudoers.d/closeddisplay
+   ```
+   
+   Add the following line (replace `<username>` with your username):
+   
+   ```
+   <username> ALL=(ALL) NOPASSWD: /usr/bin/pmset
+   ```
+   
+   Save and exit the editor.
+
+3. **Copy Binary** (optional)
+   ```bash
+   sudo cp .build/release/ClosedDisplay /usr/local/bin/
+   ```
 
 ## Usage
 
@@ -92,7 +155,19 @@ The test suite includes:
 - Correctness tests (state transitions, lifecycle)
 - Performance benchmarks (state change overhead)
 - Property-based tests (state machine invariants)
+Contributing
 
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+## Security
+
+For security concerns, please see our [Security Policy](SECURITY.md).
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.
+
+## 
 ## Architecture
 
 See [docs/closed-display.md](docs/closed-display.md) for detailed architecture documentation.

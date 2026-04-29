@@ -1,0 +1,157 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  SWIFT_VERSION: '6.0'
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: macos-14  # Apple Silicon runner
+    
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Get version
+      id: get_version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION=${GITHUB_REF#refs/tags/v}
+        fi
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        echo "Version: ${VERSION}"
+        
+    - name: Set up Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: ${{ env.SWIFT_VERSION }}
+        
+    - name: Cache Swift packages
+      uses: actions/cache@v4
+      with:
+        path: .build
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
+          
+    - name: Build release binary
+      run: |
+        swift build -c release
+        strip .build/release/ClosedDisplay
+        
+    - name: Run tests
+      run: swift test
+      
+    - name: Create TAR.GZ package
+      run: |
+        chmod +x create-release.sh
+        ./create-release.sh ${{ steps.get_version.outputs.version }}
+        
+    - name: Create DMG package
+      run: |
+        chmod +x create-dmg.sh
+        ./create-dmg.sh ${{ steps.get_version.outputs.version }}
+        
+    - name: Generate release notes
+      id: generate_notes
+      run: |
+        VERSION=${{ steps.get_version.outputs.version }}
+        
+        cat > release_notes.md << 'EOF'
+        ## ClosedDisplay v${{ steps.get_version.outputs.version }}
+        
+        A macOS utility that allows Apple Silicon Macs to run with the lid closed without requiring an external display.
+        
+        ### 📦 Installation
+        
+        **Option 1: DMG (Recommended)**
+        1. Download `ClosedDisplay-v${{ steps.get_version.outputs.version }}-arm64.dmg`
+        2. Open the DMG file
+        3. Double-click `install.sh` (or right-click → Open)
+        4. Follow the installation prompts
+        
+        **Option 2: TAR.GZ**
+        ```bash
+        tar -xzf ClosedDisplay-v${{ steps.get_version.outputs.version }}-arm64.tar.gz
+        cd ClosedDisplay-v${{ steps.get_version.outputs.version }}
+        ./install.sh
+        ```
+        
+        ### ✨ Features
+        
+        - Prevents system sleep when laptop lid is closed
+        - Thermal safety monitoring (automatically reverts on overheating)
+        - Power source awareness (AC/battery transitions)
+        - Clean signal handling for graceful shutdown
+        
+        ### 📋 Requirements
+        
+        - macOS 14.0 or later
+        - Apple Silicon Mac (M1/M2/M3/M4)
+        - Administrator privileges (for initial setup)
+        
+        ### 🔐 Verification
+        
+        **SHA256 Checksums:**
+        ```
+        $(cat ClosedDisplay-v${VERSION}-arm64.dmg.sha256)
+        $(cat ClosedDisplay-v${VERSION}-arm64.tar.gz.sha256)
+        ```
+        
+        ### 📖 Documentation
+        
+        See [README.md](README.md) for detailed usage instructions.
+        
+        ---
+        
+        **Note:** This is an unsigned binary. On first run, you may need to go to System Settings → Privacy & Security and click "Allow Anyway".
+        EOF
+        
+    - name: Create GitHub Release
+      id: create_release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v${{ steps.get_version.outputs.version }}
+        name: Release v${{ steps.get_version.outputs.version }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: false
+        files: |
+          ClosedDisplay-v${{ steps.get_version.outputs.version }}-arm64.dmg
+          ClosedDisplay-v${{ steps.get_version.outputs.version }}-arm64.dmg.sha256
+          ClosedDisplay-v${{ steps.get_version.outputs.version }}-arm64.tar.gz
+          ClosedDisplay-v${{ steps.get_version.outputs.version }}-arm64.tar.gz.sha256
+        fail_on_unmatched_files: true
+        
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-packages-v${{ steps.get_version.outputs.version }}
+        path: |
+          ClosedDisplay-v${{ steps.get_version.outputs.version }}-arm64.dmg
+          ClosedDisplay-v${{ steps.get_version.outputs.version }}-arm64.dmg.sha256
+          ClosedDisplay-v${{ steps.get_version.outputs.version }}-arm64.tar.gz
+          ClosedDisplay-v${{ steps.get_version.outputs.version }}-arm64.tar.gz.sha256
+        retention-days: 90

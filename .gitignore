@@ -53,3 +53,11 @@ temp/
 .fake
 
 .build/
+
+# Release artifacts
+ClosedDisplay-v*.tar.gz
+ClosedDisplay-v*.dmg
+*.sha256
+ClosedDisplay-v*/
+dmg_staging/
+temp_*.dmg
