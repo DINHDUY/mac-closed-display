@@ -112,7 +112,13 @@ jobs:
 
     - name: Staple notarization ticket
       run: |
-        xcrun stapler staple ClosedDisplay.app
+        echo "Waiting for ticket to propagate to CDN..."
+        sleep 30
+        for attempt in 1 2 3 4 5; do
+          xcrun stapler staple ClosedDisplay.app && break
+          echo "Staple attempt ${attempt} failed, retrying in 30s..."
+          sleep 30
+        done
         xcrun stapler validate ClosedDisplay.app
         echo "✓ Notarization ticket stapled to app bundle"
 
@@ -141,7 +147,14 @@ jobs:
           --password "$APPLE_APP_PASSWORD" \
           --team-id "$APPLE_TEAM_ID" \
           --wait
-        xcrun stapler staple "$DMG"
+        echo "Waiting for ticket to propagate to CDN..."
+        sleep 30
+        # Retry stapler up to 5 times (ticket CDN propagation can lag)
+        for attempt in 1 2 3 4 5; do
+          xcrun stapler staple "$DMG" && break
+          echo "Staple attempt ${attempt} failed, retrying in 30s..."
+          sleep 30
+        done
         xcrun stapler validate "$DMG"
         echo "✓ DMG signed, notarized, and stapled"
 
