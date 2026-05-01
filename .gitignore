@@ -54,6 +54,8 @@ temp/
 
 .build/
 
+.private/
+
 # Release artifacts
 ClosedDisplay-v*.tar.gz
 ClosedDisplay-v*.dmg

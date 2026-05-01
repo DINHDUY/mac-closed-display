@@ -67,11 +67,53 @@ jobs:
     - name: Strip binary
       run: strip ClosedDisplay.app/Contents/MacOS/ClosedDisplay
 
-    - name: Ad-hoc code sign
+    - name: Import signing certificate
+      env:
+        CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE }}
+        CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
       run: |
-        codesign --deep --force --sign - ClosedDisplay.app
-        codesign --verify --deep ClosedDisplay.app
-        echo "✓ App bundle ad-hoc signed"
+        KEYCHAIN_PATH=$RUNNER_TEMP/signing.keychain-db
+        security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+        security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+        echo "$CERTIFICATE_BASE64" | base64 --decode > $RUNNER_TEMP/cert.p12
+        security import $RUNNER_TEMP/cert.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+        security list-keychains -d user -s "$KEYCHAIN_PATH"
+        rm $RUNNER_TEMP/cert.p12
+        echo "✓ Certificate imported"
+
+    - name: Code sign app bundle
+      env:
+        SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+      run: |
+        codesign --deep --force --options runtime \
+          --entitlements ClosedDisplay.entitlements \
+          --sign "$SIGNING_IDENTITY" \
+          ClosedDisplay.app
+        codesign --verify --deep --strict ClosedDisplay.app
+        echo "✓ App bundle signed with Developer ID"
+
+    - name: Notarize app bundle
+      env:
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      run: |
+        ditto -c -k --keepParent ClosedDisplay.app ClosedDisplay-notarize.zip
+        xcrun notarytool submit ClosedDisplay-notarize.zip \
+          --apple-id "$APPLE_ID" \
+          --password "$APPLE_APP_PASSWORD" \
+          --team-id "$APPLE_TEAM_ID" \
+          --wait
+        rm ClosedDisplay-notarize.zip
+        echo "✓ Notarization complete"
+
+    - name: Staple notarization ticket
+      run: |
+        xcrun stapler staple ClosedDisplay.app
+        xcrun stapler validate ClosedDisplay.app
+        echo "✓ Notarization ticket stapled to app bundle"
 
     - name: Create TAR.GZ package
       run: |
@@ -82,7 +124,26 @@ jobs:
       run: |
         chmod +x scripts/create-dmg.sh
         ./scripts/create-dmg.sh ${{ steps.get_version.outputs.version }}
-        
+
+    - name: Sign, notarize, and staple DMG
+      env:
+        SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      run: |
+        VERSION=${{ steps.get_version.outputs.version }}
+        DMG="ClosedDisplay-v${VERSION}-arm64.dmg"
+        codesign --sign "$SIGNING_IDENTITY" "$DMG"
+        xcrun notarytool submit "$DMG" \
+          --apple-id "$APPLE_ID" \
+          --password "$APPLE_APP_PASSWORD" \
+          --team-id "$APPLE_TEAM_ID" \
+          --wait
+        xcrun stapler staple "$DMG"
+        xcrun stapler validate "$DMG"
+        echo "✓ DMG signed, notarized, and stapled"
+
     - name: Generate release notes
       id: generate_notes
       run: |
@@ -134,22 +195,13 @@ jobs:
 
         See [README.md](README.md) for the full user guide.
 
-        ### ⚠️ Gatekeeper Notice
+        ### ⚠️ First-Launch Prompt
 
-        This app uses ad-hoc signing (no Apple Developer account). If macOS says the app is "damaged" or blocks it:
-
-        **Option A — Right-click to open:**
-        Right-click `ClosedDisplay.app` in Finder → **Open** → click **Open** in the dialog.
-
-        **Option B — Remove quarantine flag (Terminal):**
-        ```bash
-        xattr -cr /Applications/ClosedDisplay.app
-        ```
-        Then launch normally.
+        macOS will show a permission prompt on first launch because the app controls system sleep settings. Click **OK** to allow it.
 
         ---
 
-        **Note:** This app is not notarized. The quarantine removal above is safe and only needed once after install.
+        **Note:** This app is signed with a Developer ID certificate and notarized by Apple. No Gatekeeper workarounds are needed.
         EOF
         
     - name: Create GitHub Release
@@ -178,3 +230,8 @@ jobs:
           ClosedDisplay-v${{ steps.get_version.outputs.version }}-arm64.tar.gz
           ClosedDisplay-v${{ steps.get_version.outputs.version }}-arm64.tar.gz.sha256
         retention-days: 90
+
+    - name: Clean up keychain
+      if: always()
+      run: |
+        security delete-keychain $RUNNER_TEMP/signing.keychain-db || true

@@ -93,14 +93,6 @@ LAUNCH:
    Open ClosedDisplay from your Applications folder.
    The menu bar icon will appear automatically.
 
-IF macOS SAYS "APP IS DAMAGED" OR BLOCKS THE APP:
-   This app uses ad-hoc signing. Run this once in Terminal:
-
-      xattr -cr /Applications/ClosedDisplay.app
-
-   Then launch normally. Alternatively, right-click the app
-   in Finder and choose Open, then click Open in the dialog.
-
 AUTO-START ON LOGIN:
    System Settings → General → Login Items → Add ClosedDisplay.app
 
