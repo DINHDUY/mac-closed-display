@@ -14,7 +14,7 @@ echo "Creating release package: $PACKAGE_NAME"
 echo ""
 
 # Build .app bundle only if not already present (e.g. pre-built in CI)
-if [ -d "${APP_BUNDLE}/Contents/MacOS/${APP_NAME}" ]; then
+if [ -f "${APP_BUNDLE}/Contents/MacOS/${APP_NAME}" ]; then
     echo "✓ Using existing app bundle: ${APP_BUNDLE}"
 else
     # Build release binary
