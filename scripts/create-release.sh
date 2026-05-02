@@ -60,10 +60,31 @@ else
     <true/>
     <key>NSSupportsAutomaticTermination</key>
     <false/>
+    <key>CFBundleIconName</key>
+    <string>AppIcon</string>
 </dict>
 </plist>
 EOF
     echo "✓ App bundle created"
+
+    # Compile asset catalog (AppIcon)
+    echo ""
+    echo "Compiling asset catalog..."
+    ACTOOL=$(xcrun -f actool)
+    "$ACTOOL" \
+      --output-format human-readable-text \
+      --notices --warnings \
+      --export-dependency-info /tmp/actool-deps.txt \
+      --output-partial-info-plist /tmp/actool-partial.plist \
+      --app-icon AppIcon \
+      --compress-pngs \
+      --enable-on-demand-resources NO \
+      --platform macosx \
+      --minimum-deployment-target 14.0 \
+      --target-device mac \
+      --compile "${APP_BUNDLE}/Contents/Resources" \
+      "${SCRIPT_DIR}/../src/Assets.xcassets" 2>&1 | grep -v '^$' || true
+    echo "✓ Asset catalog compiled"
 fi
 
 # Create release directory

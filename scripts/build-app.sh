@@ -4,6 +4,7 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 APP_NAME="ClosedDisplay"
 APP_BUNDLE="${APP_NAME}.app"
 VERSION="${1:-1.0.0}"
@@ -63,10 +64,32 @@ cat > "${APP_BUNDLE}/Contents/Info.plist" << EOF
     <true/>
     <key>NSSupportsAutomaticTermination</key>
     <false/>
+    <key>CFBundleIconName</key>
+    <string>AppIcon</string>
 </dict>
 </plist>
 EOF
 echo "✓ Info.plist created"
+
+# Compile asset catalog (AppIcon)
+echo ""
+echo "Compiling asset catalog..."
+ACTOOL=$(xcrun -f actool)
+ACCATALOG="${SCRIPT_DIR}/../src/Assets.xcassets"
+"$ACTOOL" \
+  --output-format human-readable-text \
+  --notices --warnings \
+  --export-dependency-info /tmp/actool-deps.txt \
+  --output-partial-info-plist /tmp/actool-partial.plist \
+  --app-icon AppIcon \
+  --compress-pngs \
+  --enable-on-demand-resources NO \
+  --platform macosx \
+  --minimum-deployment-target 14.0 \
+  --target-device mac \
+  --compile "${APP_BUNDLE}/Contents/Resources" \
+  "$ACCATALOG" 2>&1 | grep -v '^$' || true
+echo "✓ Asset catalog compiled"
 
 echo ""
 echo "========================================="

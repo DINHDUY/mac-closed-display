@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-05-02
+
+### Added
+- App icon: `AppIcon` asset catalog with all required macOS sizes (16 → 1024 pt, @1x and @2x)
+- 1024 × 1024 px App Store icon (no alpha channel; squircle mask applied by system)
+- `Makefile` with targets: `build`, `build-debug`, `test`, `app`, `install`, `uninstall`, `release`, `release-dmg`, `release-all`, `clean`, `help`
+
+### Changed
+- `scripts/build-app.sh` and `scripts/create-release.sh` now compile the asset catalog via `actool` and set `CFBundleIconName` in `Info.plist`
+
 ## [1.0.1] - 2026-04-29
 
 ### Added
