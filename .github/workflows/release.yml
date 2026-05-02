@@ -102,12 +102,23 @@ jobs:
         APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       run: |
         ditto -c -k --keepParent ClosedDisplay.app ClosedDisplay-notarize.zip
-        xcrun notarytool submit ClosedDisplay-notarize.zip \
+        RESULT=$(xcrun notarytool submit ClosedDisplay-notarize.zip \
           --apple-id "$APPLE_ID" \
           --password "$APPLE_APP_PASSWORD" \
           --team-id "$APPLE_TEAM_ID" \
-          --wait
+          --wait --output-format json)
+        echo "$RESULT"
+        STATUS=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])")
+        SUB_ID=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
         rm ClosedDisplay-notarize.zip
+        if [ "$STATUS" != "Accepted" ]; then
+          echo "Notarization failed (status: $STATUS). Fetching log..."
+          xcrun notarytool log "$SUB_ID" \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID"
+          exit 1
+        fi
         echo "✓ Notarization complete"
 
     - name: Staple notarization ticket
@@ -142,14 +153,24 @@ jobs:
         VERSION=${{ steps.get_version.outputs.version }}
         DMG="ClosedDisplay-v${VERSION}-arm64.dmg"
         codesign --sign "$SIGNING_IDENTITY" "$DMG"
-        xcrun notarytool submit "$DMG" \
+        RESULT=$(xcrun notarytool submit "$DMG" \
           --apple-id "$APPLE_ID" \
           --password "$APPLE_APP_PASSWORD" \
           --team-id "$APPLE_TEAM_ID" \
-          --wait
+          --wait --output-format json)
+        echo "$RESULT"
+        STATUS=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])")
+        SUB_ID=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+        if [ "$STATUS" != "Accepted" ]; then
+          echo "Notarization failed (status: $STATUS). Fetching log..."
+          xcrun notarytool log "$SUB_ID" \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID"
+          exit 1
+        fi
         echo "Waiting for ticket to propagate to CDN..."
         sleep 30
-        # Retry stapler up to 5 times (ticket CDN propagation can lag)
         for attempt in 1 2 3 4 5; do
           xcrun stapler staple "$DMG" && break
           echo "Staple attempt ${attempt} failed, retrying in 30s..."
