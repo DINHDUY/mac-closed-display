@@ -106,19 +106,6 @@ To have ClosedDisplay launch automatically when you log in:
 1. Open **System Settings → General → Login Items**
 2. Click **+** and select `ClosedDisplay.app` from your Applications folder
 
-### macOS Gatekeeper
-
-This app uses ad-hoc signing and is not notarized. If macOS shows **"ClosedDisplay is damaged and can't be opened"**:
-
-**Option A — Remove the quarantine flag (recommended):**
-```bash
-xattr -cr /Applications/ClosedDisplay.app
-```
-Then launch normally. This is safe and only needed once.
-
-**Option B — Right-click to open:**
-Right-click `ClosedDisplay.app` in Finder → **Open** → click **Open** in the dialog.
-
 ## How It Works
 
 1. **Lid Detection**: Monitors `AppleClamshellState` via IOKit Registry
