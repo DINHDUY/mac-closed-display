@@ -49,7 +49,7 @@ jobs:
     - name: Generate code coverage
       if: matrix.configuration == 'debug'
       run: |
-        xcrun llvm-cov export \
+        xcrun --toolchain swift llvm-cov export \
           .build/debug/ClosedDisplayPackageTests.xctest/Contents/MacOS/ClosedDisplayPackageTests \
           -instr-profile=.build/debug/codecov/default.profdata \
           -format=lcov > coverage.lcov

@@ -73,6 +73,9 @@ class StatusBarController: NSObject, NSMenuDelegate {
         
         // Setup status bar item
         setupStatusBar()
+        
+        // Check for first-run permissions setup
+        checkPermissionsOnFirstRun()
     }
     
     // MARK: - Status Bar Setup
@@ -110,6 +113,18 @@ class StatusBarController: NSObject, NSMenuDelegate {
         suspendItem.target = self
         suspendItem.tag = 2
         menu.addItem(suspendItem)
+        
+        menu.addItem(NSMenuItem.separator())
+        
+        // Setup Permissions menu item
+        let setupPermissionsItem = NSMenuItem(
+            title: "Setup Permissions...",
+            action: #selector(setupPermissions),
+            keyEquivalent: ""
+        )
+        setupPermissionsItem.target = self
+        setupPermissionsItem.tag = 3
+        menu.addItem(setupPermissionsItem)
         
         menu.addItem(NSMenuItem.separator())
         
@@ -303,6 +318,101 @@ class StatusBarController: NSObject, NSMenuDelegate {
         }
     }
     
+    // MARK: - Permissions Setup
+
+    private func checkPermissionsOnFirstRun() {
+        let sudoersPath = "/private/etc/sudoers.d/closeddisplay"
+        let promptShownKey = "com.closed-display.setupPromptShown"
+
+        guard !FileManager.default.fileExists(atPath: sudoersPath),
+              !UserDefaults.standard.bool(forKey: promptShownKey) else { return }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.setupPermissions()
+        }
+    }
+
+    @objc private func setupPermissions() {
+        let sudoersPath = "/private/etc/sudoers.d/closeddisplay"
+        let promptShownKey = "com.closed-display.setupPromptShown"
+
+        // Already configured
+        if FileManager.default.fileExists(atPath: sudoersPath) {
+            let alert = NSAlert()
+            alert.messageText = "Permissions Already Configured"
+            alert.informativeText = "The passwordless permissions for pmset are already set up."
+            alert.alertStyle = .informational
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+            return
+        }
+
+        // Mark as prompted so we never auto-show again, even on Cancel
+        UserDefaults.standard.set(true, forKey: promptShownKey)
+
+        // Approval dialog
+        let approvalAlert = NSAlert()
+        approvalAlert.messageText = "Setup Passwordless Permissions"
+        approvalAlert.informativeText = "ClosedDisplay needs to create a sudoers rule so it can run pmset without a password prompt. Your macOS administrator password will be required."
+        approvalAlert.alertStyle = .informational
+        approvalAlert.addButton(withTitle: "Setup")
+        approvalAlert.addButton(withTitle: "Cancel")
+        guard approvalAlert.runModal() == .alertFirstButtonReturn else { return }
+
+        // Validate username — guard against shell injection
+        let username = NSUserName()
+        let usernamePattern = "^[a-zA-Z0-9._-]+$"
+        guard let regex = try? NSRegularExpression(pattern: usernamePattern),
+              regex.firstMatch(in: username, range: NSRange(username.startIndex..., in: username)) != nil else {
+            let errorAlert = NSAlert()
+            errorAlert.messageText = "Invalid Username"
+            errorAlert.informativeText = "Your system username contains characters that are not allowed in sudoers configuration."
+            errorAlert.alertStyle = .warning
+            errorAlert.addButton(withTitle: "OK")
+            errorAlert.runModal()
+            return
+        }
+
+        // Build shell command: write → validate → install → lock down → clean up
+        let shellCmd = [
+            "printf '%s ALL=(ALL) NOPASSWD: /usr/bin/pmset\\n' '\(username)' | /usr/bin/tee /tmp/closeddisplay_sudoers > /dev/null",
+            "/usr/sbin/visudo -cf /tmp/closeddisplay_sudoers",
+            "/bin/cp /tmp/closeddisplay_sudoers /private/etc/sudoers.d/closeddisplay",
+            "/bin/chmod 440 /private/etc/sudoers.d/closeddisplay",
+            "/bin/rm -f /tmp/closeddisplay_sudoers"
+        ].joined(separator: " && ")
+
+        let appleScriptSource = "do shell script \"\(shellCmd)\" with administrator privileges"
+
+        var scriptError: NSDictionary?
+        guard let script = NSAppleScript(source: appleScriptSource) else {
+            showSetupError("Failed to initialise AppleScript.")
+            return
+        }
+        script.executeAndReturnError(&scriptError)
+
+        if let err = scriptError {
+            let msg = err["NSAppleScriptErrorMessage"] as? String ?? "Unknown error"
+            showSetupError(msg)
+        } else {
+            let successAlert = NSAlert()
+            successAlert.messageText = "Permissions Configured"
+            successAlert.informativeText = "ClosedDisplay can now run pmset without a password prompt."
+            successAlert.alertStyle = .informational
+            successAlert.addButton(withTitle: "OK")
+            successAlert.runModal()
+        }
+    }
+
+    private func showSetupError(_ description: String) {
+        let alert = NSAlert()
+        alert.messageText = "Setup Failed"
+        alert.informativeText = "Setup failed: \(description)"
+        alert.alertStyle = .critical
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
+    }
+
     // MARK: - Menu Actions
     
     @objc private func showAbout() {

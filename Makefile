@@ -1,6 +1,6 @@
 VERSION ?= 1.0.0
 
-.PHONY: all build build-debug test app install uninstall \
+.PHONY: all build build-debug test test-debug app install uninstall \
         release release-dmg release-all clean help
 
 all: app
@@ -17,6 +17,14 @@ build-debug:
 
 test:
 	swift test
+
+test-debug:
+	swift test --enable-code-coverage
+	xcrun --toolchain swift llvm-cov export \
+		.build/debug/ClosedDisplayPackageTests.xctest/Contents/MacOS/ClosedDisplayPackageTests \
+		-instr-profile=.build/debug/codecov/default.profdata \
+		-format=lcov > .build/debug/codecov/coverage.lcov
+	@echo "Coverage report: .build/debug/codecov/coverage.lcov"
 
 # ── App bundle ───────────────────────────────────────────────────────────────
 
@@ -64,6 +72,7 @@ help:
 	@echo ""
 	@echo "Test"
 	@echo "  test           Run swift test suite"
+	@echo "  test-debug     Run tests with code coverage (lcov -> .build/debug/codecov/coverage.lcov)"
 	@echo ""
 	@echo "Install"
 	@echo "  install        Install app to /Applications"
