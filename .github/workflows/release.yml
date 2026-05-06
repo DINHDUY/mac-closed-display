@@ -44,7 +44,7 @@ jobs:
         echo "Version: ${VERSION}"
         
     - name: Set up Swift
-      uses: swift-actions/setup-swift@v2
+      uses: swift-actions/setup-swift@v3
       with:
         swift-version: ${{ env.SWIFT_VERSION }}
         
