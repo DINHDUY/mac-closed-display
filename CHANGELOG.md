@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-05-06
+
+### Added
+- **Setup Permissions dialog**: new "Setup Permissions..." menu item in the status bar menu creates `/private/etc/sudoers.d/closeddisplay`, granting the current user passwordless sudo for `/usr/bin/pmset`
+- **First-run auto-prompt**: on first launch (sudoers file absent and user not yet prompted), the permissions dialog appears automatically after a 0.5 s delay so the menu bar icon is visible first
+- `make test-debug` target: runs `swift test --enable-code-coverage` then exports an lcov report to `.build/debug/codecov/coverage.lcov`
+
+### Fixed
+- Code coverage export: `xcrun llvm-cov` → `xcrun --toolchain swift llvm-cov` to fix "unsupported instrumentation profile format version" error caused by a version mismatch between the Xcode-bundled and Swift-toolchain-bundled `llvm-cov` (both `Makefile` and `.github/workflows/test.yml`)
+
 ## [1.1.1] - 2026-05-02
 
 ### Added
