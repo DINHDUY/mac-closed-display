@@ -10,13 +10,10 @@ on:
     - cron: '0 2 * * *'
   workflow_dispatch:
 
-env:
-  SWIFT_VERSION: '6.0'
-
 jobs:
   test:
     name: Run Tests
-    runs-on: macos-14  # Apple Silicon runner
+    runs-on: macos-15  # Apple Silicon runner with Xcode 16 / Swift 6
     
     strategy:
       matrix:
@@ -24,15 +21,10 @@ jobs:
         
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       
-    - name: Set up Swift
-      uses: swift-actions/setup-swift@v3
-      with:
-        swift-version: ${{ env.SWIFT_VERSION }}
-        
     - name: Cache Swift packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: .build
         key: ${{ runner.os }}-spm-${{ matrix.configuration }}-${{ hashFiles('**/Package.resolved') }}
@@ -56,7 +48,7 @@ jobs:
           
     - name: Upload coverage to Codecov
       if: matrix.configuration == 'debug'
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v6
       with:
         files: ./coverage.lcov
         flags: unittests
