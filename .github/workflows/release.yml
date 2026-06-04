@@ -14,13 +14,10 @@ on:
 permissions:
   contents: write
 
-env:
-  SWIFT_VERSION: '6.0'
-
 jobs:
   create-release:
     name: Create Release
-    runs-on: macos-14  # Apple Silicon runner
+    runs-on: macos-15  # Apple Silicon runner with Xcode 16 / Swift 6
     
     outputs:
       version: ${{ steps.get_version.outputs.version }}
@@ -28,7 +25,7 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
         
@@ -43,13 +40,8 @@ jobs:
         echo "version=${VERSION}" >> $GITHUB_OUTPUT
         echo "Version: ${VERSION}"
         
-    - name: Set up Swift
-      uses: swift-actions/setup-swift@v3
-      with:
-        swift-version: ${{ env.SWIFT_VERSION }}
-        
     - name: Cache Swift packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: .build
         key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
@@ -256,7 +248,7 @@ jobs:
         fail_on_unmatched_files: true
         
     - name: Upload release artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: release-packages-v${{ steps.get_version.outputs.version }}
         path: |

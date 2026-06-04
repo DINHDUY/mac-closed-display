@@ -7,25 +7,17 @@ on:
     branches: [ main, develop ]
   workflow_dispatch:
 
-env:
-  SWIFT_VERSION: '6.0'
-
 jobs:
   build:
     name: Build on macOS
-    runs-on: macos-14  # Apple Silicon runner
+    runs-on: macos-15  # Apple Silicon runner with Xcode 16 / Swift 6
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       
-    - name: Set up Swift
-      uses: swift-actions/setup-swift@v3
-      with:
-        swift-version: ${{ env.SWIFT_VERSION }}
-        
     - name: Cache Swift packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: .build
         key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
@@ -44,7 +36,7 @@ jobs:
         .build/release/ClosedDisplay --help || true
         
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ClosedDisplay-binary-${{ github.sha }}
         path: .build/release/ClosedDisplay
