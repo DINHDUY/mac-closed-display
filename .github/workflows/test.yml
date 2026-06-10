@@ -48,7 +48,7 @@ jobs:
           
     - name: Upload coverage to Codecov
       if: matrix.configuration == 'debug'
-      uses: codecov/codecov-action@v6
+      uses: codecov/codecov-action@v7
       with:
         files: ./coverage.lcov
         flags: unittests
